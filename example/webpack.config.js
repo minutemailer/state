@@ -15,6 +15,17 @@ module.exports = {
     devServer: {
         compress: true,
     },
+    module: {
+        rules: [
+            {
+                test: /\.jsx?$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                },
+            },
+        ],
+    },
     plugins: [
         new HtmlWebpackPlugin({
             title: 'Moore',
