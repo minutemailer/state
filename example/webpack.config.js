@@ -10,7 +10,7 @@ module.exports = {
         publicPath: '/',
     },
     resolve: {
-        extensions: ['.js', '.jsx'],
+        extensions: ['.js', '.jsx', '.scss'],
     },
     devServer: {
         compress: true,
@@ -23,6 +23,42 @@ module.exports = {
                 use: {
                     loader: 'babel-loader',
                 },
+            },
+            {
+                test: /\.s[ac]ss$/i,
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: {
+                                localIdentName: '[hash:base64:5]',
+                            },
+                        },
+                    },
+                    'sass-loader',
+                ],
+            },
+            {
+                test: /\.svg$/,
+                use: [{
+                    loader: '@svgr/webpack',
+                    options: {
+                        icon: true,
+                        svgoConfig: {
+                            plugins: {
+                                convertColors: {
+                                    currentColor: true,
+                                },
+                                addAttributesToSVGElement: {
+                                    attributes: {
+                                        fill: 'currentColor',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                }],
             },
         ],
     },

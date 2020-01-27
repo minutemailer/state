@@ -1,6 +1,9 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { createMachine, useMachine } from '../index';
+import '@minutemailer/ui/design-system/scss/style.scss';
+
+import { Button, Typography, Alert, Box } from '@minutemailer/ui';
 
 createMachine('kanye', {
     state: {
@@ -40,28 +43,37 @@ const If = ({ condition, render }) => {
     return render();
 };
 
-const App = () => {
-    const [{ current, ...data }, machine] = useMachine('kanye');
+const Quote = () => {
+    const [{ current, quote, error }, machine] = useMachine('kanye');
 
     return (
         <>
-            <If condition={current === 'idle'} render={() => (
-                <>
-                    <p><button type="button" className="button" onClick={machine.fetch}>Fetch a Kanye quote</button></p>
-                    <blockquote><p>{data.quote}</p></blockquote>
-                </>
-            )} />
-            <If condition={current === 'fetching'} render={() => (
-                <p>Fetching...</p>
+            <Typography variant="secondary-headline" marginBottom="s">Kanye Rest</Typography>
+            <If condition={current === 'idle' || current === 'fetching'} render={() => (
+                <Alert action={(current === 'fetching') ? 'Fetching...' : 'Fetch'} onClick={machine.fetch}>
+                    {(current === 'fetching') ? '...' : quote || 'No quote'}
+                </Alert>
             )} />
             <If condition={current === 'error'} render={() => (
-                <>
-                    <p><button type="button" className="button button--error" onClick={machine.retry}>Retry</button></p>
-                    <blockquote><p>{data.error.toString()}</p></blockquote>
-                </>
+                <Alert action="Retry" type="error" onClick={machine.retry}>
+                    {error.toString()}
+                </Alert>
             )} />
         </>
     );
 };
+
+const StateTracker = () => {
+    const [{ current }] = useMachine('kanye');
+
+    return <Box marginTop="s"><Alert type="warning">Current state: {current}</Alert></Box>
+};
+
+const App = () => (
+    <Box background padding rounded>
+        <Quote />
+        <StateTracker />
+    </Box>
+);
 
 render(<App />, document.getElementById('app'));
