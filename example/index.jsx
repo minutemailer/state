@@ -13,14 +13,14 @@ createMachine('kanye', {
     },
 
     transitions: {
-        fetch: { from: 'idle', to: 'fetching' },
-        success: { from: 'fetching', to: 'idle' },
-        failure: { from: 'fetching', to: 'error' },
-        retry: { from: 'error', to: 'fetching' },
+        fetch: { from: 'idle', to: 'fetch-ing' }, // fetch-ing to test kebab to camel
+        success: { from: 'fetch-ing', to: 'idle' },
+        failure: { from: 'fetch-ing', to: 'error' },
+        retry: { from: 'error', to: 'fetch-ing' },
     },
 
     handlers: {
-        onFetching() {
+        onFetchIng() {
             setTimeout(() => {
                 fetch('https://api.kanye.rest')
                     .then(response => response.json())
@@ -49,9 +49,9 @@ const Quote = () => {
     return (
         <>
             <Typography variant="secondary-headline" marginBottom="s">Kanye Rest</Typography>
-            <If condition={current === 'idle' || current === 'fetching'} render={() => (
-                <Alert action={(current === 'fetching') ? 'Fetching...' : 'Fetch'} onClick={machine.fetch}>
-                    {(current === 'fetching') ? '...' : quote || 'No quote'}
+            <If condition={current === 'idle' || current === 'fetch-ing'} render={() => (
+                <Alert action={(current === 'fetch-ing') ? 'Fetching...' : 'Fetch'} onClick={machine.fetch}>
+                    {(current === 'fetch-ing') ? '...' : quote || 'No quote'}
                 </Alert>
             )} />
             <If condition={current === 'error'} render={() => (

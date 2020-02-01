@@ -1,3 +1,4 @@
+import kebabToCamel from './kebabToCamel';
 import capitalize from './capitalize';
 
 const machines = {};
@@ -78,7 +79,7 @@ class Machine {
 
         this.emit();
 
-        const handler = `on${capitalize(state)}`;
+        const handler = `on${capitalize(kebabToCamel(state))}`;
 
         if (handler in this) {
             this[handler](data);
