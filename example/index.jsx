@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { createMachine, useMachine } from '../index';
+import { createMachine, useMachine } from '../dist/cjs';
 import '@minutemailer/ui/design-system/scss/style.scss';
 
 import { Button, Typography, Alert, Box } from '@minutemailer/ui';

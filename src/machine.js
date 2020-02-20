@@ -22,8 +22,6 @@ class Machine {
         this.state = configuration.state;
         this.handlers = configuration.handlers;
 
-        this.input = (...args) => this._input(...args);
-
         Object.entries(this.handlers).forEach(([name, func]) => {
             this[name] = (...args) => func.call(this, args);
         });
@@ -57,7 +55,7 @@ class Machine {
         return transition && transition.from === currentState;
     }
 
-    _input(action, data) {
+    input = (action, data) => {
         const { current } = this.state;
 
         if (!this.transitionAllowed(current, action)) {
@@ -67,10 +65,9 @@ class Machine {
         const transition = this.transitions[action];
 
         this.setState(transition.to, data);
-    }
+    };
 
     setState(state, data) {
-
         this.state = {
             ...this.state,
             current: state,
