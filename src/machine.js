@@ -83,6 +83,10 @@ class Machine {
         }
     }
 
+    setData(data) {
+        this.setState(this.state.current, data);
+    }
+
     emit() {
         this.subscribers.forEach((cb) => cb.call(null, this.state));
     }
