@@ -67,11 +67,13 @@ class Machine {
         this.setState(transition.to, data);
     };
 
-    setState(state, data) {
+    setState(state, data = {}) {
+        const newData = (data && typeof data === 'object') ? data : {};
+
         this.state = {
             ...this.state,
             current: state,
-            ...data,
+            ...newData,
         };
 
         this.emit();
