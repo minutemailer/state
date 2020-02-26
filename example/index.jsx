@@ -1,36 +1,63 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { render } from 'react-dom';
-import { createMachine, useMachine } from '../dist/cjs';
+import { createMachine, useMachine } from '../src';
 import '@minutemailer/ui/design-system/scss/style.scss';
+import {Text, Typography, Alert, Box, Checkbox} from '@minutemailer/ui';
 
-import { Button, Typography, Alert, Box } from '@minutemailer/ui';
-
-createMachine('kanye', {
+createMachine('todos', {
     state: {
         current: 'idle',
-        quote: null,
+        todos: [],
         error: false,
     },
 
     transitions: {
-        fetch: { from: 'idle', to: 'fetch-ing' }, // fetch-ing to test kebab to camel
-        success: { from: 'fetch-ing', to: 'idle' },
-        failure: { from: 'fetch-ing', to: 'error' },
-        retry: { from: 'error', to: 'fetch-ing' },
+        fetch: { from: 'idle', to: 'fetching' },
+        success: { from: 'fetching', to: 'idle' },
+        failure: { from: 'fetching', to: 'error' },
+        retry: { from: 'error', to: 'fetching' },
+        updateTodo: { from: 'idle', to: 'idle' },
     },
 
     handlers: {
-        onFetchIng() {
-            setTimeout(() => {
-                fetch('https://api.kanye.rest')
-                    .then(response => response.json())
-                    .then(({ quote }) => {
-                        this.success({ quote });
-                    })
-                    .catch((error) => {
-                        this.failure({ error });
-                    });
-            }, 500);
+        onFetching() {
+            fetch('https://jsonplaceholder.typicode.com/todos')
+                .then(response => response.json())
+                .then((todos) => {
+                    this.success({ todos });
+                })
+                .catch((error) => {
+                    this.failure({ error: error.message() });
+                });
+        },
+
+        onUpdatingTodo({ todo }) {
+            //console.log(todo);
+        }
+    }
+});
+
+createMachine('todos.todo', {
+    state: {
+        current: 'idle',
+        todo: {},
+        error: false,
+    },
+
+    transitions: {
+        update: { from: 'idle', to: 'updating' },
+        updated: { from: 'updating', to: 'idle' },
+        sync: { from: 'idle', to: 'idle' },
+    },
+
+    handlers: {
+        onUpdating({ completed }) {
+            this.updated({
+                todo: {
+                    ...this.state.todo,
+                    completed,
+                },
+            });
         },
     }
 });
@@ -43,18 +70,36 @@ const If = ({ condition, render }) => {
     return render();
 };
 
-const Quote = () => {
-    const [{ current, quote, error }, machine] = useMachine('kanye');
+const Todo = ({ id }) => {
+    const [{ todo }, machine] = useMachine('todos.todo', id);
+    const update = useCallback((completed) => machine.update({ completed }), []);
+
+    return (
+        <Box marginBottom="xs">
+            <Alert type={(todo.completed) ? null : 'warning'}>
+                <Checkbox checked={todo.completed} onChange={update}>{todo.title}</Checkbox>
+            </Alert>
+        </Box>
+    );
+};
+
+const Todos = () => {
+    const [{ todos, error }, machine] = useMachine('todos');
+    const completedTodos = todos.filter(todo => todo.completed).length;
+    const allTodos = todos.length;
+
+    useEffect(machine.fetch, []);
 
     return (
         <>
-            <Typography variant="secondary-headline" marginBottom="s">Kanye Rest</Typography>
-            <If condition={current === 'idle' || current === 'fetch-ing'} render={() => (
-                <Alert action={(current === 'fetch-ing') ? 'Fetching...' : 'Fetch'} onClick={machine.fetch}>
-                    {(current === 'fetch-ing') ? '...' : quote || 'No quote'}
-                </Alert>
-            )} />
-            <If condition={current === 'error'} render={() => (
+            <Typography variant="secondary-headline" marginBottom="s">Todo list ({`${completedTodos}/${allTodos}`})</Typography>
+            <If condition={machine.isFetching()} render={() => {
+                return <Text>Fetching</Text>;
+            }} />
+            <If condition={!machine.isFetching()} render={() => {
+                return todos.map((todo) => <Todo id={todo.id} key={todo.id} />);
+            }} />
+            <If condition={machine.isError()} render={() => (
                 <Alert action="Retry" type="error" onClick={machine.retry}>
                     {error.toString()}
                 </Alert>
@@ -64,14 +109,14 @@ const Quote = () => {
 };
 
 const StateTracker = () => {
-    const [{ current }] = useMachine('kanye');
+    const [{ current }] = useMachine('todos');
 
     return <Box marginTop="s"><Alert type="warning">Current state: {current}</Alert></Box>
 };
 
 const App = () => (
     <Box background padding rounded>
-        <Quote />
+        <Todos />
         <StateTracker />
     </Box>
 );

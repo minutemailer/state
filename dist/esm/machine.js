@@ -9,7 +9,7 @@ import capitalize from './capitalize';
 const machines = {};
 const proxyHandler = {
   get: (obj, prop) => {
-    if (prop.indexOf('is') === 0) {
+    if (prop.indexOf('is') === 0 && !(prop in obj)) {
       const state = prop.replace('is', '').toLowerCase();
       return obj.isState.bind(obj, state);
     }
@@ -19,7 +19,7 @@ const proxyHandler = {
 };
 
 class Machine {
-  constructor(configuration) {
+  constructor(name, configuration, id = null, initialData = {}, sync = false) {
     _defineProperty(this, "input", (action, data) => {
       const {
         current
@@ -33,17 +33,85 @@ class Machine {
       this.setState(transition.to, data);
     });
 
+    this.name = name;
+    this.id = id;
+    this.sync = sync;
     this.subscribers = [];
-    this.transitions = configuration.transitions;
-    this.state = configuration.state;
-    this.handlers = configuration.handlers;
+    this.configuration = configuration;
+    this.transitions = this.configuration.transitions;
+    this.state = _objectSpread({}, this.configuration.state, {}, initialData);
+    this.handlers = this.configuration.handlers;
     Object.entries(this.handlers).forEach(([name, func]) => {
-      this[name] = (...args) => func.call(this, args);
+      this[name] = (...args) => func.apply(this, args);
     });
     Object.entries(this.transitions).forEach(([state]) => {
       this[state] = data => this.input(state, data);
     });
     return new Proxy(this, proxyHandler);
+  }
+
+  setSync(sync) {
+    this.sync = sync;
+  }
+
+  getParent() {
+    const [parent] = this.name.split('.');
+
+    if (parent !== this.name) {
+      return parent;
+    }
+
+    return null;
+  }
+
+  getParentMachine() {
+    const parent = this.getParent();
+
+    if (parent) {
+      return getMachine(parent);
+    }
+
+    return null;
+  }
+
+  getParentAttr() {
+    const [parent] = this.name.split('.');
+
+    if (parent !== this.name) {
+      return parent;
+    }
+
+    return this.name;
+  }
+
+  getChildAttr() {
+    const [parent, child] = this.name.split('.');
+
+    if (parent !== this.name) {
+      return child;
+    }
+
+    return this.name;
+  }
+
+  getChildMachines() {
+    const parent = this.getParent();
+
+    if (!parent) {
+      const childMachines = Object.keys(machines).filter(name => name.indexOf(`${this.name}.`) > -1);
+      return childMachines;
+    }
+
+    return [];
+  }
+
+  isParent() {
+    const childMachines = this.getChildMachines();
+    return childMachines.length > 0;
+  }
+
+  isChild() {
+    return this.getParent() !== null;
   }
 
   subscribe(cb) {
@@ -67,27 +135,108 @@ class Machine {
     return transition && transition.from === currentState;
   }
 
-  setState(state, data) {
+  setState(state, data = {}, silent = false) {
+    const newData = data && typeof data === 'object' ? data : {};
+    const prevState = `${this.state.current}`;
     this.state = _objectSpread({}, this.state, {
       current: state
-    }, data);
-    this.emit();
-    const handler = `on${capitalize(kebabToCamel(state))}`;
+    }, newData);
 
-    if (handler in this) {
-      this[handler](data);
+    if (!silent) {
+      this.emit();
+
+      if (prevState !== this.state.current) {
+        const handler = `on${capitalize(kebabToCamel(state))}`;
+
+        if (handler in this) {
+          this[handler](data);
+        }
+      }
     }
+  }
+
+  setData(data, silent = false) {
+    this.setState(this.state.current, data, silent);
   }
 
   emit() {
     this.subscribers.forEach(cb => cb.call(null, this.state));
+    const parentMachine = this.getParentMachine();
+
+    if (parentMachine) {
+      const childAttr = this.getChildAttr();
+      const parentAttr = this.getParentAttr();
+
+      const data = _objectSpread({}, this.state[childAttr]);
+
+      const transition = `update${capitalize(childAttr)}`;
+      const items = [...parentMachine.state[parentAttr]];
+      const index = items.findIndex(item => item.id === data.id);
+
+      if (index > -1) {
+        items[index] = _objectSpread({}, items[index], {}, data);
+        parentMachine[transition]({
+          [parentAttr]: items
+        });
+      }
+    }
+  }
+
+  destroy() {
+    machines[this.name] = null;
+    delete machines[this.name];
   }
 
 }
 
-export function createMachine(name, configuration) {
-  machines[name] = new Machine(configuration);
-}
-export function getMachine(name) {
+export function createMachine(name, configuration = {}, id = null, initialData = null) {
+  if (!(name in machines)) {
+    machines[name] = new Machine(name, configuration, null, initialData);
+  }
+
+  if (id) {
+    const idName = `${name}.${id}`;
+    const [parent, child] = name.split('.');
+    let sync = false;
+    let data = initialData;
+
+    if (idName in machines) {
+      return machines[idName];
+    }
+
+    if (!initialData && parent !== name) {
+      const parentMachine = getMachine(parent);
+
+      if (parentMachine && parent in parentMachine.state) {
+        const items = parentMachine.state[parent];
+        const item = items.find(item => item.id === id);
+
+        if (item) {
+          data = {
+            [child]: item
+          };
+          sync = true;
+          parentMachine.setSync(true);
+        }
+      }
+    }
+
+    machines[idName] = new Machine(idName, _objectSpread({}, machines[name].configuration), id, data, sync);
+    return machines[idName];
+  }
+
   return machines[name];
+}
+export function getMachine(name, id = null, initialData = null) {
+  if (!(name in machines)) {
+    return false;
+  }
+
+  let machine = machines[name];
+
+  if (id) {
+    machine = createMachine(name, null, id, initialData);
+  }
+
+  return machine;
 }
