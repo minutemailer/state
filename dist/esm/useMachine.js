@@ -11,14 +11,12 @@ export default function useMachine(name, id = null, initialData = null) {
   useEffect(() => {
     const [parent] = name.split('.');
     const subscription = machine.subscribe(setState);
-
-    if (parent !== name) {
-      const parentMachine = getMachine(parent);
-    }
-
     return () => {
       subscription.unsubscribe();
-      machine.destroy();
+
+      if (id) {
+        machine.destroy();
+      }
     };
   }, []);
   return [state, machine];
