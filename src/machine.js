@@ -168,23 +168,25 @@ class Machine {
     emit() {
         this.subscribers.forEach((cb) => cb.call(null, this.state));
 
-        const parentMachine = this.getParentMachine();
+        if (this.sync) {
+            const parentMachine = this.getParentMachine();
 
-        if (parentMachine) {
-            const childAttr = this.getChildAttr();
-            const parentAttr = this.getParentAttr();
-            const data = { ...this.state[childAttr] };
-            const transition = `update${capitalize(childAttr)}`;
-            const items = [...parentMachine.state[parentAttr]];
-            const index = items.findIndex((item) => item.id === data.id);
+            if (parentMachine) {
+                const childAttr = this.getChildAttr();
+                const parentAttr = this.getParentAttr();
+                const data = {...this.state[childAttr]};
+                const transition = `update${capitalize(childAttr)}`;
+                const items = [...parentMachine.state[parentAttr]];
+                const index = items.findIndex((item) => item.id === data.id);
 
-            if (index > -1) {
-                items[index] = {
-                    ...items[index],
-                    ...data,
-                };
+                if (index > -1) {
+                    items[index] = {
+                        ...items[index],
+                        ...data,
+                    };
 
-                parentMachine[transition]({ [parentAttr]: items });
+                    parentMachine[transition]({[parentAttr]: items});
+                }
             }
         }
     }
