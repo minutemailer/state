@@ -207,7 +207,7 @@ export function createMachine(name, configuration = {}, id = null, initialData =
       return machines[idName];
     }
 
-    if (!initialData && parent !== name) {
+    if (parent !== name) {
       const parentMachine = getMachine(parent);
 
       if (parentMachine && parent in parentMachine.state) {
@@ -215,9 +215,12 @@ export function createMachine(name, configuration = {}, id = null, initialData =
         const item = items.find(item => item.id === id);
 
         if (item) {
-          data = {
-            [child]: item
-          };
+          if (!initialData) {
+            data = {
+              [child]: item
+            };
+          }
+
           sync = true;
           parentMachine.setSync(true);
         }
