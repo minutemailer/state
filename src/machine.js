@@ -15,6 +15,20 @@ const proxyHandler = {
     },
 };
 
+export function getMachine(name, id = null, initialData = null) {
+    if (!(name in machines)) {
+        return false;
+    }
+
+    let machine = machines[name];
+
+    if (id) {
+        machine = createMachine(name, null, id, initialData);
+    }
+
+    return machine;
+}
+
 class Machine {
     constructor(name, configuration, id = null, initialData = {}, sync = false) {
         this.name = name;
@@ -31,10 +45,16 @@ class Machine {
         });
 
         Object.entries(this.transitions).forEach(([state]) => {
-            this[state] = (data) => this.input(state, data);
+            this[state] = (...data) => {
+                this.input(state, data);
+            };
         });
 
         return new Proxy(this, proxyHandler);
+    }
+
+    getMachine(machine) {
+        return getMachine(machine);
     }
 
     setSync(sync) {
@@ -138,8 +158,8 @@ class Machine {
         this.setState(transition.to, data);
     };
 
-    setState(state, data = {}, silent = false) {
-        const newData = (data && typeof data === 'object') ? data : {};
+    setState(state, data = [], silent = false) {
+        const newData = (data.length && typeof data[0] === 'object') ? data[0] : {};
         const prevState = `${this.state.current}`;
 
         this.state = {
@@ -155,7 +175,7 @@ class Machine {
                 const handler = `on${capitalize(kebabToCamel(state))}`;
 
                 if (handler in this) {
-                    this[handler](data);
+                    this[handler](...data);
                 }
             }
         }
@@ -243,18 +263,4 @@ export function createMachine(name, configuration = {}, id = null, initialData =
     }
 
     return machines[name];
-}
-
-export function getMachine(name, id = null, initialData = null) {
-    if (!(name in machines)) {
-        return false;
-    }
-
-    let machine = machines[name];
-
-    if (id) {
-        machine = createMachine(name, null, id, initialData);
-    }
-
-    return machine;
 }

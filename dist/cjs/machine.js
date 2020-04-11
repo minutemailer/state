@@ -3,8 +3,8 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createMachine = createMachine;
 exports.getMachine = getMachine;
+exports.createMachine = createMachine;
 
 var _kebabToCamel = _interopRequireDefault(require("./kebabToCamel"));
 
@@ -29,6 +29,20 @@ const proxyHandler = {
     return obj[prop];
   }
 };
+
+function getMachine(name, id = null, initialData = null) {
+  if (!(name in machines)) {
+    return false;
+  }
+
+  let machine = machines[name];
+
+  if (id) {
+    machine = createMachine(name, null, id, initialData);
+  }
+
+  return machine;
+}
 
 class Machine {
   constructor(name, configuration, id = null, initialData = {}, sync = false) {
@@ -57,9 +71,15 @@ class Machine {
       this[name] = (...args) => func.apply(this, args);
     });
     Object.entries(this.transitions).forEach(([state]) => {
-      this[state] = data => this.input(state, data);
+      this[state] = (...data) => {
+        this.input(state, data);
+      };
     });
     return new Proxy(this, proxyHandler);
+  }
+
+  getMachine(machine) {
+    return getMachine(machine);
   }
 
   setSync(sync) {
@@ -147,8 +167,8 @@ class Machine {
     return transition && transition.from === currentState;
   }
 
-  setState(state, data = {}, silent = false) {
-    const newData = data && typeof data === 'object' ? data : {};
+  setState(state, data = [], silent = false) {
+    const newData = data.length && typeof data[0] === 'object' ? data[0] : {};
     const prevState = `${this.state.current}`;
     this.state = _objectSpread({}, this.state, {
       current: state
@@ -161,7 +181,7 @@ class Machine {
         const handler = `on${(0, _capitalize.default)((0, _kebabToCamel.default)(state))}`;
 
         if (handler in this) {
-          this[handler](data);
+          this[handler](...data);
         }
       }
     }
@@ -244,18 +264,4 @@ function createMachine(name, configuration = {}, id = null, initialData = null) 
   }
 
   return machines[name];
-}
-
-function getMachine(name, id = null, initialData = null) {
-  if (!(name in machines)) {
-    return false;
-  }
-
-  let machine = machines[name];
-
-  if (id) {
-    machine = createMachine(name, null, id, initialData);
-  }
-
-  return machine;
 }
