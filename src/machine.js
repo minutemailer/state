@@ -182,7 +182,7 @@ class Machine {
     }
 
     setData(data, silent = false) {
-        this.setState(this.state.current, data, silent);
+        this.setState(this.state.current, [data], silent);
     }
 
     emit() {
