@@ -31,14 +31,15 @@ const proxyHandler = {
 };
 
 function getMachine(name, id = null, initialData = null) {
-  if (!(name in machines)) {
-    return false;
-  }
-
   let machine = machines[name];
 
   if (id) {
-    machine = createMachine(name, null, id, initialData);
+    const idName = `${name}.${id}`;
+    machine = getMachine(idName);
+
+    if (!machine) {
+      machine = createMachine(name, null, id, initialData);
+    }
   }
 
   return machine;

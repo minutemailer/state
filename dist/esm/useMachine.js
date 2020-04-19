@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getMachine } from './machine';
-export default function useMachine(name, id = null, initialData = null) {
+export default function useMachine(name, id = null, initialData = null, persistent = true) {
   const machine = getMachine(name, id, initialData);
 
   if (!machine) {
@@ -14,7 +14,7 @@ export default function useMachine(name, id = null, initialData = null) {
     return () => {
       subscription.unsubscribe();
 
-      if (id) {
+      if (!persistent) {
         machine.destroy();
       }
     };

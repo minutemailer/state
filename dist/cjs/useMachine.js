@@ -9,7 +9,7 @@ var _react = require("react");
 
 var _machine = require("./machine");
 
-function useMachine(name, id = null, initialData = null) {
+function useMachine(name, id = null, initialData = null, persistent = true) {
   const machine = (0, _machine.getMachine)(name, id, initialData);
 
   if (!machine) {
@@ -23,7 +23,7 @@ function useMachine(name, id = null, initialData = null) {
     return () => {
       subscription.unsubscribe();
 
-      if (id) {
+      if (!persistent) {
         machine.destroy();
       }
     };
