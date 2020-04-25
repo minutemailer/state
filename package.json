@@ -1,6 +1,6 @@
 {
   "name": "@minutemailer/moore",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "description": "A simple finite state machine for react",
   "main": "dist/cjs/index.js",
   "directories": {

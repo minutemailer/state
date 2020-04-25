@@ -147,7 +147,7 @@ class Machine {
   }
 
   isState(state) {
-    return state === this.state.current;
+    return state === this.state.current || state === kebabToCamel(this.state.current);
   }
 
   transitionAllowed(currentState, action) {
