@@ -1,15 +1,13 @@
 {
   "name": "@minutemailer/moore",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "description": "A simple finite state machine for react",
   "main": "dist/cjs/index.js",
-  "directories": {
-    "example": "example"
-  },
   "scripts": {
     "start": "webpack-dev-server --config example/webpack.config.js",
     "bundle": "npx babel --config-file=./babel.config.esm.js src --out-dir dist/esm | npx babel --config-file=./babel.config.js src --out-dir dist/cjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pub": "rm -rf dist && npm run bundle && npm publish --access public"
   },
   "author": "",
   "license": "MIT",
