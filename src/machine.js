@@ -6,9 +6,9 @@ const machines = {};
 const proxyHandler = {
     get: (obj, prop) => {
         if (prop.indexOf('is') === 0 && !(prop in obj)) {
-            const state = prop.replace('is', '').toLowerCase();
+            const state = prop.replace('is', '');
 
-            return obj.isState.bind(obj, state);
+            return obj.isState.bind(obj, state.charAt(0).toLowerCase() + state.slice(1));
         }
 
         return obj[prop];
