@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, memo } from 'react';
 import { render } from 'react-dom';
 import { createMachine, useMachine } from '../src';
 import '@minutemailer/ui/design-system/scss/style.scss';
@@ -62,16 +62,8 @@ createMachine('todos.todo', {
     }
 });
 
-const If = ({ condition, render }) => {
-    if (!condition) {
-        return null;
-    }
-
-    return render();
-};
-
-const Todo = ({ id }) => {
-    const [{ todo }, machine] = useMachine('todos.todo', id);
+const Todo = memo(({ id }) => {
+    const [{ todo }, machine] = useMachine('todos.todo', id, ['todo']);
     const update = useCallback((completed) => machine.update({ completed }), []);
 
     return (
@@ -81,10 +73,10 @@ const Todo = ({ id }) => {
             </Alert>
         </Box>
     );
-};
+});
 
 const Todos = () => {
-    const [{ todos, error }, machine] = useMachine('todos');
+    const [{ todos, error }, machine] = useMachine('todos', null, ['todos', 'error']);
     const completedTodos = todos.filter(todo => todo.completed).length;
     const allTodos = todos.length;
 
@@ -93,31 +85,27 @@ const Todos = () => {
     return (
         <>
             <Typography variant="secondary-headline" marginBottom="s">Todo list ({`${completedTodos}/${allTodos}`})</Typography>
-            <If condition={machine.isFetching()} render={() => {
-                return <Text>Fetching</Text>;
-            }} />
-            <If condition={!machine.isFetching()} render={() => {
-                return todos.map((todo) => <Todo id={todo.id} key={todo.id} />);
-            }} />
-            <If condition={machine.isError()} render={() => (
+            {machine.isFetching() && (<Text>Fetching</Text>)}
+            {!machine.isFetching() && todos.map((todo) => <Todo id={todo.id} key={todo.id} />)}
+            {machine.isError() && (
                 <Alert action="Retry" type="error" onClick={machine.retry}>
                     {error.toString()}
                 </Alert>
-            )} />
+            )}
         </>
     );
 };
 
-const StateTracker = () => {
-    const [{ current }] = useMachine('todos');
+const StateTracker = memo(() => {
+    const [{ current }] = useMachine('todos', null, ['current']);
 
     return <Box marginTop="s"><Alert type="warning">Current state: {current}</Alert></Box>
-};
+});
 
 const App = () => (
     <Box background padding rounded>
-        <Todos />
         <StateTracker />
+        <Todos />
     </Box>
 );
 

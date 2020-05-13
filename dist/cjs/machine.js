@@ -21,7 +21,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 const machines = {};
 const proxyHandler = {
   get: (obj, prop) => {
-    if (prop.indexOf('is') === 0 && !(prop in obj)) {
+    if (typeof prop === 'string' && prop.indexOf('is') === 0 && !(prop in obj)) {
       const state = prop.replace('is', '');
       return obj.isState.bind(obj, state.charAt(0).toLowerCase() + state.slice(1));
     }
@@ -30,7 +30,7 @@ const proxyHandler = {
   }
 };
 
-function getMachine(name, id = null, initialData = null) {
+function getMachine(name, id = null) {
   let machine = machines[name];
 
   if (id) {
@@ -38,7 +38,7 @@ function getMachine(name, id = null, initialData = null) {
     machine = getMachine(idName);
 
     if (!machine) {
-      machine = createMachine(name, null, id, initialData);
+      machine = createMachine(name, null, id);
     }
   }
 
@@ -168,15 +168,24 @@ class Machine {
     return transition && transition.from === currentState;
   }
 
+  setData(data, silent = false) {
+    this.setState(this.state.current, [data], silent);
+  }
+
   setState(state, data = [], silent = false) {
     const newData = data.length && typeof data[0] === 'object' ? data[0] : {};
     const prevState = `${this.state.current}`;
-    this.state = _objectSpread({}, this.state, {
-      current: state
-    }, newData);
+
+    const newState = _objectSpread({}, newData);
+
+    if (state !== prevState) {
+      newState.current = state;
+    }
+
+    this.state = _objectSpread({}, this.state, {}, newState);
 
     if (!silent) {
-      this.emit();
+      this.emit(newState);
 
       if (prevState !== this.state.current) {
         const handler = `on${(0, _capitalize.default)((0, _kebabToCamel.default)(state))}`;
@@ -188,12 +197,8 @@ class Machine {
     }
   }
 
-  setData(data, silent = false) {
-    this.setState(this.state.current, [data], silent);
-  }
-
-  emit() {
-    this.subscribers.forEach(cb => cb.call(null, this.state));
+  emit(newData) {
+    this.subscribers.forEach(cb => cb.call(null, newData, this.state));
 
     if (this.sync) {
       const parentMachine = this.getParentMachine();
@@ -225,16 +230,16 @@ class Machine {
 
 }
 
-function createMachine(name, configuration = {}, id = null, initialData = null) {
+function createMachine(name, configuration = {}, id = null) {
   if (!(name in machines)) {
-    machines[name] = new Machine(name, configuration, null, initialData);
+    machines[name] = new Machine(name, configuration, null);
   }
 
   if (id) {
     const idName = `${name}.${id}`;
     const [parent, child] = name.split('.');
     let sync = false;
-    let data = initialData;
+    let data = null;
 
     if (idName in machines) {
       return machines[idName];
@@ -248,12 +253,9 @@ function createMachine(name, configuration = {}, id = null, initialData = null) 
         const item = items.find(item => item.id === id);
 
         if (item) {
-          if (!initialData) {
-            data = {
-              [child]: item
-            };
-          }
-
+          data = {
+            [child]: item
+          };
           sync = true;
           parentMachine.setSync(true);
         }

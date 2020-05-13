@@ -1,18 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { getMachine } from './machine';
+import filterObject from './filterObject';
 
-export default function useMachine(name, id = null, initialData = null, persistent = true) {
-    const machine = getMachine(name, id, initialData);
+export default function useMachine(name, id = null, reducer = false, persistent = true) {
+    const machine = useMemo(() => getMachine(name, id), [name, id]);
 
     if (!machine) {
         throw new Error('Machine not found');
     }
 
-    const [state, setState] = useState(machine.state);
+    if (reducer === false) {
+        return machine;
+    }
+
+    const [state, setState] = useState(filterObject(machine.state, reducer));
 
     useEffect(() => {
-        const [parent] = name.split('.');
-        const subscription = machine.subscribe(setState);
+        const subscription = machine.subscribe((newState) => {
+            const newData = filterObject(newState, reducer);
+
+            if (Object.keys(newData).length) {
+                setState((oldState) => ({...oldState, ...newData }));
+            }
+        });
 
         return () => {
             subscription.unsubscribe();
