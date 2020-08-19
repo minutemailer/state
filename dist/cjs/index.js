@@ -5,19 +5,19 @@ Object.defineProperty(exports, "__esModule", {
 });
 Object.defineProperty(exports, "createMachine", {
   enumerable: true,
-  get: function () {
+  get: function get() {
     return _machine.createMachine;
   }
 });
 Object.defineProperty(exports, "getMachine", {
   enumerable: true,
-  get: function () {
+  get: function get() {
     return _machine.getMachine;
   }
 });
 Object.defineProperty(exports, "useMachine", {
   enumerable: true,
-  get: function () {
+  get: function get() {
     return _useMachine.default;
   }
 });

@@ -4,8 +4,10 @@ module.exports = {
             '@babel/preset-env',
             {
                 modules: 'cjs',
+                useBuiltIns: "usage",
+                corejs: 3,
                 targets: {
-                    browsers: ['>2%, not dead'],
+                    browsers: ['> 2%, IE 11, not dead'],
                 },
             },
         ],

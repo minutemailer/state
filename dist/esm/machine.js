@@ -21,7 +21,7 @@ export function getMachine(name, id = null) {
   let machine = machines[name];
 
   if (id) {
-    const idName = `${name}.${id}`;
+    const idName = "".concat(name, ".").concat(id);
     machine = getMachine(idName);
 
     if (!machine) {
@@ -53,7 +53,7 @@ class Machine {
     this.subscribers = [];
     this.configuration = configuration;
     this.transitions = this.configuration.transitions;
-    this.state = _objectSpread({}, this.configuration.state, {}, initialData);
+    this.state = _objectSpread(_objectSpread({}, this.configuration.state), initialData);
     this.handlers = this.configuration.handlers;
     Object.entries(this.handlers).forEach(([name, func]) => {
       this[name] = (...args) => func.apply(this, args);
@@ -118,7 +118,7 @@ class Machine {
     const parent = this.getParent();
 
     if (!parent) {
-      const childMachines = Object.keys(machines).filter(name => name.indexOf(`${this.name}.`) > -1);
+      const childMachines = Object.keys(machines).filter(name => name.indexOf("".concat(this.name, ".")) > -1);
       return childMachines;
     }
 
@@ -161,7 +161,7 @@ class Machine {
 
   setState(state, data = [], silent = false) {
     const newData = data.length && typeof data[0] === 'object' ? data[0] : {};
-    const prevState = `${this.state.current}`;
+    const prevState = "".concat(this.state.current);
 
     const newState = _objectSpread({}, newData);
 
@@ -169,13 +169,13 @@ class Machine {
       newState.current = state;
     }
 
-    this.state = _objectSpread({}, this.state, {}, newState);
+    this.state = _objectSpread(_objectSpread({}, this.state), newState);
 
     if (!silent) {
       this.emit(newState);
 
       if (prevState !== this.state.current) {
-        const handler = `on${capitalize(kebabToCamel(state))}`;
+        const handler = "on".concat(capitalize(kebabToCamel(state)));
 
         if (handler in this) {
           this[handler](...data);
@@ -196,12 +196,12 @@ class Machine {
 
         const data = _objectSpread({}, this.state[childAttr]);
 
-        const transition = `update${capitalize(childAttr)}`;
+        const transition = "update".concat(capitalize(childAttr));
         const items = [...parentMachine.state[parentAttr]];
         const index = items.findIndex(item => item.id === data.id);
 
         if (index > -1) {
-          items[index] = _objectSpread({}, items[index], {}, data);
+          items[index] = _objectSpread(_objectSpread({}, items[index]), data);
           parentMachine[transition]({
             [parentAttr]: items
           });
@@ -223,7 +223,7 @@ export function createMachine(name, configuration = {}, id = null) {
   }
 
   if (id) {
-    const idName = `${name}.${id}`;
+    const idName = "".concat(name, ".").concat(id);
     const [parent, child] = name.split('.');
     let sync = false;
     let data = null;

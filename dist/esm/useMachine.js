@@ -24,7 +24,7 @@ export default function useMachine(name, id = null, reducer = false, persistent 
       const newData = filterObject(newState, reducer);
 
       if (Object.keys(newData).length) {
-        setState(oldState => _objectSpread({}, oldState, {}, newData));
+        setState(oldState => _objectSpread(_objectSpread({}, oldState), newData));
       }
     });
     return () => {
