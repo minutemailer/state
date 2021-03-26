@@ -1,6 +1,6 @@
 {
   "name": "@minutemailer/state",
-  "version": "0.9.13",
+  "version": "1.0.0",
   "description": "A simple finite state machine for react",
   "main": "dist/index.js",
   "module": "dist/index.js",
