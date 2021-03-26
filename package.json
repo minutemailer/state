@@ -1,5 +1,5 @@
 {
-  "name": "@minutemailer/moore",
+  "name": "@minutemailer/state",
   "version": "0.9.13",
   "description": "A simple finite state machine for react",
   "main": "dist/index.js",
