@@ -1,71 +1,3 @@
-"use strict";
-
-require("core-js/modules/es.symbol");
-
-require("core-js/modules/es.symbol.description");
-
-require("core-js/modules/es.symbol.iterator");
-
-require("core-js/modules/es.array.concat");
-
-require("core-js/modules/es.array.filter");
-
-require("core-js/modules/es.array.find");
-
-require("core-js/modules/es.array.find-index");
-
-require("core-js/modules/es.array.for-each");
-
-require("core-js/modules/es.array.from");
-
-require("core-js/modules/es.array.includes");
-
-require("core-js/modules/es.array.index-of");
-
-require("core-js/modules/es.array.iterator");
-
-require("core-js/modules/es.array.slice");
-
-require("core-js/modules/es.function.name");
-
-require("core-js/modules/es.object.entries");
-
-require("core-js/modules/es.object.get-own-property-descriptor");
-
-require("core-js/modules/es.object.get-own-property-descriptors");
-
-require("core-js/modules/es.object.keys");
-
-require("core-js/modules/es.object.to-string");
-
-require("core-js/modules/es.regexp.exec");
-
-require("core-js/modules/es.regexp.to-string");
-
-require("core-js/modules/es.string.includes");
-
-require("core-js/modules/es.string.iterator");
-
-require("core-js/modules/es.string.replace");
-
-require("core-js/modules/es.string.split");
-
-require("core-js/modules/web.dom-collections.for-each");
-
-require("core-js/modules/web.dom-collections.iterator");
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getMachine = _getMachine;
-exports.createMachine = createMachine;
-
-var _kebabToCamel = _interopRequireDefault(require("./kebabToCamel"));
-
-var _capitalize = _interopRequireDefault(require("./capitalize"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -100,6 +32,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+import kebabToCamel from './kebabToCamel';
+import capitalize from './capitalize';
 var machines = {};
 var proxyHandler = {
   get: function get(obj, prop) {
@@ -114,19 +48,22 @@ var proxyHandler = {
 
 function _getMachine(name) {
   var id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  var machine = machines[name];
+  var machineName = name instanceof Machine ? name.name : name;
+  var machine = machines[machineName];
 
   if (id) {
-    var idName = "".concat(name, ".").concat(id);
+    var idName = "".concat(machineName, ".").concat(id);
     machine = _getMachine(idName);
 
     if (!machine) {
-      machine = createMachine(name, null, id);
+      machine = createMachine(machineName, null, id);
     }
   }
 
   return machine;
 }
+
+export { _getMachine as getMachine };
 
 var Machine = /*#__PURE__*/function () {
   function Machine(name, configuration) {
@@ -294,7 +231,7 @@ var Machine = /*#__PURE__*/function () {
   }, {
     key: "isState",
     value: function isState(state) {
-      return state === this.state.current || state === (0, _kebabToCamel.default)(this.state.current);
+      return state === this.state.current || state === kebabToCamel(this.state.current);
     }
   }, {
     key: "transitionAllowed",
@@ -328,7 +265,7 @@ var Machine = /*#__PURE__*/function () {
         this.emit(newState);
 
         if (prevState !== this.state.current) {
-          var handler = "on".concat((0, _capitalize.default)((0, _kebabToCamel.default)(state)));
+          var handler = "on".concat(capitalize(kebabToCamel(state)));
 
           if (handler in this) {
             this[handler].apply(this, _toConsumableArray(data));
@@ -354,7 +291,7 @@ var Machine = /*#__PURE__*/function () {
 
           var data = _objectSpread({}, this.state[childAttr]);
 
-          var transition = "update".concat((0, _capitalize.default)(childAttr));
+          var transition = "update".concat(capitalize(childAttr));
 
           var items = _toConsumableArray(parentMachine.state[parentAttr]);
 
@@ -380,7 +317,7 @@ var Machine = /*#__PURE__*/function () {
   return Machine;
 }();
 
-function createMachine(name) {
+export function createMachine(name) {
   var configuration = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   var id = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 

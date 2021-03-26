@@ -15,6 +15,7 @@ module.exports = {
     devServer: {
         compress: true,
     },
+    mode: 'development',
     module: {
         rules: [
             {
@@ -65,7 +66,7 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             title: 'Moore',
-            template: resolve(__dirname, './template.html'),
+            template: resolve(__dirname, './index.html'),
         }),
     ],
 };

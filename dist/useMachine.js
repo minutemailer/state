@@ -1,52 +1,3 @@
-"use strict";
-
-require("core-js/modules/es.symbol");
-
-require("core-js/modules/es.symbol.description");
-
-require("core-js/modules/es.symbol.iterator");
-
-require("core-js/modules/es.array.filter");
-
-require("core-js/modules/es.array.for-each");
-
-require("core-js/modules/es.array.from");
-
-require("core-js/modules/es.array.iterator");
-
-require("core-js/modules/es.array.slice");
-
-require("core-js/modules/es.function.name");
-
-require("core-js/modules/es.object.get-own-property-descriptor");
-
-require("core-js/modules/es.object.get-own-property-descriptors");
-
-require("core-js/modules/es.object.keys");
-
-require("core-js/modules/es.object.to-string");
-
-require("core-js/modules/es.regexp.to-string");
-
-require("core-js/modules/es.string.iterator");
-
-require("core-js/modules/web.dom-collections.for-each");
-
-require("core-js/modules/web.dom-collections.iterator");
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = useMachine;
-
-var _react = require("react");
-
-var _machine = require("./machine");
-
-var _filterObject = _interopRequireDefault(require("./filterObject"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -65,12 +16,15 @@ function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function useMachine(name) {
+import { useEffect, useState, useMemo } from 'react';
+import { getMachine } from './machine';
+import filterObject from './filterObject';
+export default function useMachine(name) {
   var id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   var reducer = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
   var persistent = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
-  var machine = (0, _react.useMemo)(function () {
-    return (0, _machine.getMachine)(name, id);
+  var machine = useMemo(function () {
+    return getMachine(name, id);
   }, [name, id]);
 
   if (!machine) {
@@ -81,14 +35,14 @@ function useMachine(name) {
     return machine;
   }
 
-  var _useState = (0, _react.useState)((0, _filterObject.default)(machine.state, reducer)),
+  var _useState = useState(filterObject(machine.state, reducer)),
       _useState2 = _slicedToArray(_useState, 2),
       state = _useState2[0],
       setState = _useState2[1];
 
-  (0, _react.useEffect)(function () {
+  useEffect(function () {
     var subscription = machine.subscribe(function (newState) {
-      var newData = (0, _filterObject.default)(newState, reducer);
+      var newData = filterObject(newState, reducer);
 
       if (Object.keys(newData).length) {
         setState(function (oldState) {

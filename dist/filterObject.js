@@ -1,42 +1,3 @@
-"use strict";
-
-require("core-js/modules/es.symbol");
-
-require("core-js/modules/es.symbol.description");
-
-require("core-js/modules/es.symbol.iterator");
-
-require("core-js/modules/es.array.filter");
-
-require("core-js/modules/es.array.from");
-
-require("core-js/modules/es.array.includes");
-
-require("core-js/modules/es.array.iterator");
-
-require("core-js/modules/es.array.slice");
-
-require("core-js/modules/es.function.name");
-
-require("core-js/modules/es.object.entries");
-
-require("core-js/modules/es.object.from-entries");
-
-require("core-js/modules/es.object.to-string");
-
-require("core-js/modules/es.regexp.to-string");
-
-require("core-js/modules/es.string.includes");
-
-require("core-js/modules/es.string.iterator");
-
-require("core-js/modules/web.dom-collections.iterator");
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = filterObject;
-
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -49,7 +10,7 @@ function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function filterObject(data, keys) {
+export default function filterObject(data, keys) {
   return Object.fromEntries(Object.entries(data).filter(function (_ref) {
     var _ref2 = _slicedToArray(_ref, 1),
         key = _ref2[0];

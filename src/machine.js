@@ -16,15 +16,16 @@ const proxyHandler = {
 };
 
 export function getMachine(name, id = null) {
-    let machine = machines[name];
+    const machineName = (name instanceof Machine) ? name.name : name;
+    let machine = machines[machineName];
 
     if (id) {
-        const idName = `${name}.${id}`;
+        const idName = `${machineName}.${id}`;
 
         machine = getMachine(idName);
 
         if (!machine) {
-            machine = createMachine(name, null, id);
+            machine = createMachine(machineName, null, id);
         }
     }
 
