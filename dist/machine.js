@@ -1,3 +1,17 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getMachine = _getMachine;
+exports.createMachine = createMachine;
+
+var _kebabToCamel = _interopRequireDefault(require("./kebabToCamel"));
+
+var _capitalize = _interopRequireDefault(require("./capitalize"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -32,8 +46,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-import kebabToCamel from './kebabToCamel';
-import capitalize from './capitalize';
 var machines = {};
 var proxyHandler = {
   get: function get(obj, prop) {
@@ -62,8 +74,6 @@ function _getMachine(name) {
 
   return machine;
 }
-
-export { _getMachine as getMachine };
 
 var Machine = /*#__PURE__*/function () {
   function Machine(name, configuration) {
@@ -231,7 +241,7 @@ var Machine = /*#__PURE__*/function () {
   }, {
     key: "isState",
     value: function isState(state) {
-      return state === this.state.current || state === kebabToCamel(this.state.current);
+      return state === this.state.current || state === (0, _kebabToCamel["default"])(this.state.current);
     }
   }, {
     key: "transitionAllowed",
@@ -265,7 +275,7 @@ var Machine = /*#__PURE__*/function () {
         this.emit(newState);
 
         if (prevState !== this.state.current) {
-          var handler = "on".concat(capitalize(kebabToCamel(state)));
+          var handler = "on".concat((0, _capitalize["default"])((0, _kebabToCamel["default"])(state)));
 
           if (handler in this) {
             this[handler].apply(this, _toConsumableArray(data));
@@ -291,7 +301,7 @@ var Machine = /*#__PURE__*/function () {
 
           var data = _objectSpread({}, this.state[childAttr]);
 
-          var transition = "update".concat(capitalize(childAttr));
+          var transition = "update".concat((0, _capitalize["default"])(childAttr));
 
           var items = _toConsumableArray(parentMachine.state[parentAttr]);
 
@@ -317,7 +327,7 @@ var Machine = /*#__PURE__*/function () {
   return Machine;
 }();
 
-export function createMachine(name) {
+function createMachine(name) {
   var configuration = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   var id = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
