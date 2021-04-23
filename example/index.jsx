@@ -7,7 +7,7 @@ const App = () => {
 
     return (
         <div>
-            <button disabled={machine.isFetching()} onClick={machine.fetch}>
+            <button disabled={!machine.can('fetch')} onClick={machine.fetch}>
                 {machine.isIdle() && 'What would Kanye say?'}
                 {machine.isFetching() && 'Let\'s see...'}
             </button>

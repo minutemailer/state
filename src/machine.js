@@ -149,6 +149,10 @@ class Machine {
         return transition && transition.from === currentState;
     }
 
+    can(action) {
+        return this.transitionAllowed(this.state.current, action);
+    }
+
     input = (action, data) => {
         const { current } = this.state;
 

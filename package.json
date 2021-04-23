@@ -3,7 +3,6 @@
   "version": "1.0.3",
   "description": "A simple finite state machine for react",
   "main": "dist/index.js",
-  "sideEffects": false,
   "scripts": {
     "start": "webpack serve --config example/webpack.config.js",
     "bundle": "rm -rf dist && NODE_ENV=production babel src --out-dir dist",
@@ -33,6 +32,6 @@
     "webpack-dev-server": "^3.11.2"
   },
   "peerDependencies": {
-    "react": "^17.0.2"
+    "react": "^16.0.0 || ^17.0.0"
   }
 }

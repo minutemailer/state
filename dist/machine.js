@@ -250,6 +250,11 @@ var Machine = /*#__PURE__*/function () {
       return transition && transition.from === currentState;
     }
   }, {
+    key: "can",
+    value: function can(action) {
+      return this.transitionAllowed(this.state.current, action);
+    }
+  }, {
     key: "setData",
     value: function setData(data) {
       var silent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
