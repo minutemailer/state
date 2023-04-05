@@ -1,37 +1,34 @@
 {
-  "name": "@minutemailer/state",
-  "version": "1.1.0",
-  "description": "A simple finite state machine for react",
-  "main": "dist/index.js",
-  "scripts": {
-    "start": "webpack serve --config example/webpack.config.js",
-    "bundle": "rm -rf dist && NODE_ENV=production babel src --out-dir dist",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "pub": "rm -rf dist && npm run bundle && npm publish --access public"
-  },
-  "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "@babel/cli": "^7.8.4",
-    "@babel/core": "^7.8.4",
-    "@babel/plugin-proposal-class-properties": "^7.8.3",
-    "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
-    "@babel/preset-env": "^7.13.12",
-    "@babel/preset-react": "^7.13.13",
-    "@svgr/webpack": "^5.1.0",
-    "babel-loader": "^8.0.6",
-    "css-loader": "^5.2.0",
-    "html-webpack-plugin": "^5.3.1",
-    "node-sass": "^5.0.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "sass-loader": "^11.0.1",
-    "style-loader": "^2.0.0",
-    "webpack": "^5.28.0",
-    "webpack-cli": "^4.5.0",
-    "webpack-dev-server": "^3.11.2"
-  },
-  "peerDependencies": {
-    "react": "^16.0.0 || ^17.0.0"
-  }
+    "name": "@minutemailer/state",
+    "version": "1.1.0",
+    "description": "A simple finite state machine for react",
+    "author": "",
+    "license": "MIT",
+    "source": "src/index.js",
+    "main": "dist/index.js",
+    "module": "dist/module.js",
+    "files": [
+        "dist/index.js",
+        "dist/index.js.map",
+        "dist/module.js",
+        "dist/module.js.map"
+    ],
+    "scripts": {
+        "start": "parcel example/index.html --dist-dir output",
+        "watch": "parcel watch",
+        "build": "parcel build"
+    },
+    "devDependencies": {
+        "@minutemailer/facade": "^0.2.4",
+        "@minutemailer/utils": "^0.0.7",
+        "@parcel/transformer-sass": "^2.8.3",
+        "parcel": "^2.8.3",
+        "prettier": "^2.8.7",
+        "process": "^0.11.10",
+        "react-dom": "^18.2.0"
+    },
+    "peerDependencies": {
+        "@minutemailer/utils": "^0.0.7",
+        "react": "^18.0.0"
+    }
 }

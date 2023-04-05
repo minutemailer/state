@@ -1,14 +1,21 @@
 import kebabToCamel from './kebabToCamel';
-import capitalize from './capitalize';
+import { capitalize } from '@minutemailer/utils';
 
 const machines = {};
 
 const proxyHandler = {
     get: (obj, prop) => {
-        if (typeof prop === 'string' && prop.indexOf('is') === 0 && !(prop in obj)) {
+        if (
+            typeof prop === 'string' &&
+            prop.indexOf('is') === 0 &&
+            !(prop in obj)
+        ) {
             const state = prop.replace('is', '');
 
-            return obj.isState.bind(obj, state.charAt(0).toLowerCase() + state.slice(1));
+            return obj.isState.bind(
+                obj,
+                state.charAt(0).toLowerCase() + state.slice(1),
+            );
         }
 
         return obj[prop];
@@ -16,7 +23,7 @@ const proxyHandler = {
 };
 
 export function getMachine(name, id = null) {
-    const machineName = (name instanceof Machine) ? name.name : name;
+    const machineName = name instanceof Machine ? name.name : name;
     let machine = machines[machineName];
 
     if (id) {
@@ -33,7 +40,13 @@ export function getMachine(name, id = null) {
 }
 
 class Machine {
-    constructor(name, configuration, id = null, initialData = {}, sync = false) {
+    constructor(
+        name,
+        configuration,
+        id = null,
+        initialData = {},
+        sync = false,
+    ) {
         this.name = name;
         this.id = id;
         this.sync = sync;
@@ -108,10 +121,9 @@ class Machine {
         const parent = this.getParent();
 
         if (!parent) {
-            const childMachines = Object.keys(machines)
-                .filter((name) => name.indexOf(`${this.name}.`) > -1);
-
-            return childMachines;
+            return Object.keys(machines).filter(
+                (name) => name.indexOf(`${this.name}.`) > -1,
+            );
         }
 
         return [];
@@ -134,13 +146,18 @@ class Machine {
 
         return {
             unsubscribe: () => {
-                this.subscribers = this.subscribers.filter((subscribedCb) => subscribedCb !== cb);
+                this.subscribers = this.subscribers.filter(
+                    (subscribedCb) => subscribedCb !== cb,
+                );
             },
         };
     }
 
     isState(state) {
-        return state === this.state.current || state === kebabToCamel(this.state.current);
+        return (
+            state === this.state.current ||
+            state === kebabToCamel(this.state.current)
+        );
     }
 
     transitionAllowed(currentState, action) {
@@ -170,7 +187,8 @@ class Machine {
     }
 
     setState(state, data = [], silent = false) {
-        const newData = (data.length && typeof data[0] === 'object') ? data[0] : {};
+        const newData =
+            data.length && typeof data[0] === 'object' ? data[0] : {};
         const prevState = `${this.state.current}`;
         const newState = { ...newData };
 
@@ -205,7 +223,7 @@ class Machine {
             if (parentMachine) {
                 const childAttr = this.getChildAttr();
                 const parentAttr = this.getParentAttr();
-                const data = {...this.state[childAttr]};
+                const data = { ...this.state[childAttr] };
                 const transition = `update${capitalize(childAttr)}`;
                 const items = [...parentMachine.state[parentAttr]];
                 const index = items.findIndex((item) => item.id === data.id);
@@ -216,7 +234,7 @@ class Machine {
                         ...data,
                     };
 
-                    parentMachine[transition]({[parentAttr]: items});
+                    parentMachine[transition]({ [parentAttr]: items });
                 }
             }
         }
@@ -251,7 +269,7 @@ export function createMachine(name, configuration = {}, id = null) {
                 const item = items.find((item) => item.id === id);
 
                 if (item) {
-                    data = {[child]: item};
+                    data = { [child]: item };
 
                     sync = true;
 

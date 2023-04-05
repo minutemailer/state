@@ -2,7 +2,12 @@ import { useEffect, useState, useMemo } from 'react';
 import { getMachine } from './machine';
 import filterObject from './filterObject';
 
-export default function useMachine(name, id = null, reducer = false, persistent = true) {
+export default function useMachine(
+    name,
+    id = null,
+    reducer = false,
+    persistent = true,
+) {
     const machine = useMemo(() => getMachine(name, id), [name, id]);
 
     if (!machine) {
@@ -20,7 +25,7 @@ export default function useMachine(name, id = null, reducer = false, persistent 
             const newData = filterObject(newState, reducer);
 
             if (Object.keys(newData).length) {
-                setState((oldState) => ({...oldState, ...newData }));
+                setState((oldState) => ({ ...oldState, ...newData }));
             }
         });
 
