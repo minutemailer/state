@@ -1,6 +1,6 @@
 {
     "name": "@minutemailer/state",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "description": "A simple finite state machine for react",
     "author": "",
     "license": "MIT",
