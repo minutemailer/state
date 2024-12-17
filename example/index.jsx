@@ -1,34 +1,28 @@
 import { createRoot } from 'react-dom/client';
 import quoteMachine from './machine';
-import { useMachine } from '../src';
-
-import '@minutemailer/facade/styles/theme.scss';
-import '@minutemailer/facade/styles/foundation.css';
-import Button from '@minutemailer/facade/components/Button';
-import Body from '@minutemailer/facade/components/Typography/Body';
-import Stack from '@minutemailer/facade/components/Stack';
 
 const App = () => {
-    const [{ quote }, machine] = useMachine(quoteMachine, null, [
-        'quote',
-        'current',
-    ]);
+    const state = quoteMachine.useCurrentState();
+    const quote = quoteMachine.useCurrentContext((context) => context.quote);
 
     return (
         <div>
-            <Button disabled={!machine.can('fetch')} onClick={machine.fetch}>
-                {machine.isIdle() && 'What would Kanye say?'}
-                {machine.isFetching() && "Let's see..."}
-            </Button>
+            <button
+                disabled={!quoteMachine.can('fetch')}
+                onClick={() => quoteMachine.action('fetch')}
+            >
+                {state === 'IDLE' && 'What would Kanye say?'}
+                {state === 'FETCHING' && "Let's see..."}
+            </button>
             {quote !== undefined && (
-                <Stack align="center" valign="middle" padding marginTop>
-                    <Body>{quote}</Body>
-                </Stack>
+                <div style={{ padding: '40px' }}>
+                    <p>{quote}</p>
+                </div>
             )}
         </div>
     );
 };
 
-const root = createRoot(document.getElementById('app'));
+const root = createRoot(document.getElementById('root'));
 
 root.render(<App />);

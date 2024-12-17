@@ -1,29 +1,53 @@
-import {createMachine} from '../src';
+import { createMachine } from '../src';
 
-export default createMachine('quote', {
-    state: {
-        current: 'idle',
-        quote: undefined,
-        error: false,
-    },
-
-    transitions: {
-        fetch: { from: 'idle', to: 'fetching' },
-        success: { from: 'fetching', to: 'idle' },
-        failure: { from: 'fetching', to: 'error' },
-        retry: { from: 'error', to: 'fetching' },
-    },
-
-    handlers: {
-        onFetching() {
-            fetch('https://api.kanye.rest')
-                .then(response => response.json())
-                .then(({ quote }) => {
-                    this.success({ quote });
-                })
-                .catch((error) => {
-                    this.failure({ error: error.message() });
-                });
+const transitions = {
+    IDLE: {
+        on: {
+            fetch: 'FETCHING',
         },
-    }
-});
+    },
+    FETCHING: {
+        on: {
+            success: 'IDLE',
+            failure: 'ERROR',
+        },
+    },
+    ERROR: {
+        on: {
+            fetch: 'FETCHING',
+        },
+    },
+};
+
+const actions = {
+    fetch(context) {
+        fetch('https://api.kanye.rest')
+            .then((response) => response.json())
+            .then(({ quote }) => this.action('success', { quote }))
+            .catch((error) => this.action('failure', { error }));
+
+        return {
+            ...context,
+            quote: undefined,
+        };
+    },
+    success(context, { quote }) {
+        return {
+            ...context,
+            quote,
+        };
+    },
+    failure(context, { error }) {
+        return {
+            ...context,
+            error: error.message,
+        };
+    },
+};
+
+const initialContext = {
+    quote: undefined,
+    error: null,
+};
+
+export default createMachine(transitions, actions, initialContext);
